@@ -1,0 +1,20 @@
+#version 140
+
+out vec4 out_colour;
+
+in vec2 textureCoords1;
+in vec2 textureCoords2;
+in float blend;
+
+uniform sampler2D particleTexture;
+uniform vec3 tintColour;
+
+void main(void){
+
+    vec4 colour1 = texture(particleTexture, textureCoords1);
+    vec4 colour2 = texture(particleTexture, textureCoords2);
+
+    vec4 blended = mix(colour1, colour2, blend);
+    // Per-texture tint: multiply RGB only, alpha stays as sampled.
+    out_colour = vec4(blended.rgb * tintColour, blended.a);
+}

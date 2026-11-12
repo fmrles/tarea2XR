@@ -1,0 +1,79 @@
+#version 400 core
+
+in vec2 pass_textureCoordinates;
+in vec3 surfaceNormal;
+in vec3 toLightVector[4];
+in vec3 toCameraVector;
+in float visibility;
+
+out vec4 out_Color;
+
+uniform sampler2D backgroundTexture;
+uniform sampler2D rTexture;
+uniform sampler2D gTexture;
+uniform sampler2D bTexture;
+uniform sampler2D blendMap;
+
+uniform vec3 lightColor[4];
+uniform vec3 attenuation[4];
+uniform float shineDamper;
+uniform float reflectivity;
+uniform vec3 skyColour;
+
+// Block 11: corridor mapping for the road (b slot) only. roadU0/roadSpanU
+// remap terrain UV.x onto the blue corridor strip of blendMapPuerto so the
+// asphalt markings land on the road; roadVRepeat keeps tiles square along z.
+uniform float roadU0;
+uniform float roadSpanU;
+uniform float roadVRepeat;
+
+void main(void){
+
+    vec4 blendMapColour = texture(blendMap, pass_textureCoordinates);
+    float backTextureAmount = 1 - (blendMapColour.r + blendMapColour.g + blendMapColour.b);
+    vec2 tiledCoords = pass_textureCoordinates * 40.0;
+    vec4 backgroundTextureColour = texture(backgroundTexture, tiledCoords) * backTextureAmount;
+    vec4 rTextureColour = texture(rTexture, tiledCoords) * blendMapColour.r;
+    vec4 gTextureColour = texture(gTexture, tiledCoords) * blendMapColour.g;
+    // Block 11: only the road (b slot) gets corridor-mapped coords; background,
+    // r and g keep the *40 tiling above. roadCoords.x runs 0..1 across the
+    // corridor (terrain UV roadU0..roadU0+roadSpanU), so the texture's yellow
+    // center line (image u ~= 0.5) sits at roadCoords.x 0.5 == terrain UV 0.5
+    // == world x 75 = lane 1 center; the white edge lines (image u ~= 0.086 /
+    // 0.913) land at world x ~= 60.5 / 89.5, just inside the corridor edges
+    // 57.42 / 92.58. roadCoords.y repeats the texture every 1/roadSpanU terrain
+    // UV units so tiles stay square in world space (see TerrainRenderer).
+    vec2 roadCoords = vec2((pass_textureCoordinates.x - roadU0) / roadSpanU,
+                           pass_textureCoordinates.y * roadVRepeat);
+    vec4 bTextureColour = texture(bTexture, roadCoords) * blendMapColour.b;
+    vec4 totalColour = backgroundTextureColour + rTextureColour + gTextureColour + bTextureColour;
+
+	vec3 unitNormal = normalize(surfaceNormal);
+    vec3 unitVectorToCamera = normalize(toCameraVector);
+
+    vec3 totalDiffuse = vec3(0.0);
+    vec3 totalSpecular = vec3(0.0);
+
+    for (int i = 0; i < 4; i++) {
+        float distance = length(toLightVector[i]);
+        float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
+
+	    vec3 unitLightVector = normalize(toLightVector[i]);
+    	float nDotl = dot(unitNormal,unitLightVector);
+	    float brightness = max(nDotl,0.0);
+        vec3 lightDirection = -unitLightVector;
+	    vec3 reflectedLightDirection = reflect(lightDirection,unitNormal);
+        float specularFactor = dot(reflectedLightDirection , unitVectorToCamera);
+	    specularFactor = max(specularFactor,0.0);
+	    float dampedFactor = pow(specularFactor,shineDamper);
+        totalDiffuse = totalDiffuse + (brightness * lightColor[i])/attFactor;
+        totalSpecular = totalSpecular + (dampedFactor * reflectivity * lightColor[i])/attFactor;
+    }
+
+    float ambientBrightness = 0.2;
+    totalDiffuse = max(totalDiffuse, ambientBrightness);
+
+	out_Color =  vec4(totalDiffuse,1.0) * totalColour + vec4(totalSpecular,1.0);
+
+	out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
+}
