@@ -854,12 +854,12 @@ public final class RunnerCore {
 
     private void win(String message) {
         state = State.WIN;
-        showMessage(message + " - PULSA ENTER PARA OTRA", 999f, 0.45f, 1f, 0.45f);
+        showMessage(message + " - ENTER PARA REINTENTAR", 999f, 0.45f, 1f, 0.45f);
     }
 
     private void lose(String message) {
         state = State.LOSE;
-        showMessage(message + " - PULSA ENTER PARA OTRA", 999f, 1f, 0.35f, 0.35f);
+        showMessage(message + " - ENTER PARA REINTENTAR", 999f, 1f, 0.35f, 0.35f);
     }
 
     private void showMessage(String message, float duration) {
