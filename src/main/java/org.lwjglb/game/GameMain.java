@@ -90,7 +90,7 @@ public class GameMain {
     private static final float RAT_TARGET_HEIGHT_U = 1.70f;
 
     /**
-     * Block 15: the two welcome rats waiting at Tibo's burrow hole dance
+     * Block 15: the two welcome rats waiting at Milton's burrow hole dance
      * relative to the goal anchor (hole center). The hole is a 6x6 u quad
      * (spans +-3 u), so X places the rats just OUTSIDE the lateral hole edges;
      * Z puts them at the near edge on the +z side — the hole scrolls in from
@@ -353,7 +353,7 @@ public class GameMain {
                 RunnerCore.CAR_OBSTACLE_SCALE[1], RunnerCore.CAR_OBSTACLE_BASE_Y[1],
                 carCyanModel.getTexture().getID());
         System.out.println("normal-maps: crate=crateNormal yellow=Ynormal cyan=Cyannormal (block 17b)");
-        // Block 10 A: the collectible is now Tibo's cheese wedge (Meshy export
+        // Block 10 A: the collectible is now Milton's cheese wedge (Meshy export
         // normalized on disk to v/vt/vn/f only, 8968 tris, 2K texture) - the
         // barrel.obj placeholder stays on disk, unloaded (like house.obj).
         TexturedModel canModel = loader.createTexturedModel("cheese/cheese", "cheese/cheese", 10, 0.5f);
@@ -366,7 +366,7 @@ public class GameMain {
                 1.064413f, 1.148455f, 1.902227f,
                 RunnerCore.CAN_SCALE, RunnerCore.CAN_CENTER_Y,
                 canModel.getTexture().getID());
-        // Block 10 B: the goal is Tibo's burrow hole - ONE flat quad in the XZ
+        // Block 10 B: the goal is Milton's burrow hole - ONE flat quad in the XZ
         // plane (4 verts at y=0 spanning +/-0.5, normals up, 6 indices) that
         // RunnerCore scales to GOAL_HOLE_U (6 u) and glues just above the road.
         // The fragment shader discards a < 0.5, so burrow.png's dithered alpha

@@ -57,7 +57,7 @@ import java.util.Random;
  *
  * Block 10 retheme (mouse): the barrel pickup is now the Meshy cheese wedge
  * (HUD counts QUESOS) and the vending-machine goal is a flat burrow-hole
- * decal - reaching it = "TIBO SE SALVO". Collision/trigger logic and the
+ * decal - reaching it = "MILTON SE SALVO". Collision/trigger logic and the
  * TrackBuilder layout are unchanged; only models, scales and copy moved.
  *
  * Block 12: SOME jump-over (LOW) obstacles materialize as the two Meshy retro
@@ -115,7 +115,7 @@ public final class RunnerCore {
     // long axis sweeps both along/across) x 0.55 u min - roughly half a lane,
     // comfortably under CAN_ROW_SPACING (2.5 u).
 
-    // --- goal: Tibo's burrow hole at the end of the track (block 10 B) ---
+    // --- goal: Milton's burrow hole at the end of the track (block 10 B) ---
     // Flat XZ decal quad built by GameMain (4 verts, uv 0..1); scaled to
     // GOAL_HOLE_U x GOAL_HOLE_U and hovered GOAL_HOLE_Y above the road.
     // Package-visible: GameMain's "goal[burrow]:" startup line reports it.
@@ -514,7 +514,7 @@ public final class RunnerCore {
         travelled += scrolled;
 
         if (travelled >= TRACK_LENGTH) {
-            win("TIBO SE SALVO");
+            win("MILTON SE SALVO");
             return;
         }
 
@@ -653,7 +653,7 @@ public final class RunnerCore {
                 pickupList.add(new Pickup(entity, event.lane, canZ));
                 drawables.add(entity);
             }
-        } else {   // GOAL: Tibo's burrow hole - reaching it means the mouse is safe
+        } else {   // GOAL: Milton's burrow hole - reaching it means the mouse is safe
             goalZ = z;
             // flat ground decal: hover GOAL_HOLE_Y just above the road (z-fight guard)
             goalEntity = new Entity(goalModel,
@@ -827,7 +827,7 @@ public final class RunnerCore {
     private void onPickup() {
         cans++;
         // The HUD counter is the per-can feedback; only the life milestone
-        // deserves a centre-screen message (and it must not cover Tibo).
+        // deserves a centre-screen message (and it must not cover Milton).
         if (cans % (int) CANS_PER_LIFE == 0) {
             if (health < MAX_HEALTH) {
                 health++;
@@ -848,7 +848,7 @@ public final class RunnerCore {
         showMessage("IMPACTO!", MESSAGE_TIME, 1f, 0.35f, 0.35f);
         if (health <= 0) {
             health = 0;
-            lose("TIBO ESTA AGOTADO");
+            lose("MILTON ESTA AGOTADO");
         }
     }
 
@@ -940,7 +940,7 @@ public final class RunnerCore {
     }
 
     /**
-     * Block 15: world anchor (center) of Tibo's burrow hole, for the two
+     * Block 15: world anchor (center) of Milton's burrow hole, for the two
      * welcome rats that dance at the entrance once the goal materializes.
      * Returns the LIVE position Vector3f owned by the goal Entity — callers
      * must only read it, never mutate it. Returns {@code null} while the goal

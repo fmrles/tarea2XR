@@ -7,7 +7,7 @@ import java.util.Random;
 
 /**
  * Block 10 B1: procedural 512x512 ARGB decal for the burrow-hole goal
- * (Tibo's home). Radial design around the image centre with radius
+ * (Milton's home). Radial design around the image centre with radius
  * {@link #R} = 240 px:
  *
  * <ul>
