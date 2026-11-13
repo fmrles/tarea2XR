@@ -74,7 +74,6 @@ public class OBJLoader {
         }
 
         verticesArray = new float[vertices.size()*6];
-        //verticesArray = new float[vertices.size()*3]; //original
         indicesArray = new int[indices.size()];
 
         int vertexPointer = 0;

@@ -25,24 +25,16 @@ public class MasterRenderer {
     private static final float NEAR_PLANE = 0.1f;
     private static final float FAR_PLANE = 1000;
 
-    // Legacy sky colour kept for API compatibility with older callers/demos.
-    // It is no longer the active fog colour — see setZone() / fogR/fogG/fogB.
     public static final float RED = 0.3f;
     public static final float GREEN = 0.2f;
     public static final float BLUE = 0.8f;
 
-    // Block 14: per-zone fog. Horizon RGB measured from the equirect panoramas
-    // (horizon row at 60% height, normalized 0..1) so fog blends into the zone
-    // skybox: zone A = morning, zone B = day, zone C = night.
-    // Block 14b: the fog CROSSFADES in sync with the skybox (see setZone()).
     private static final float FOG_A_R = 0.96f, FOG_A_G = 0.79f, FOG_A_B = 0.70f;
     private static final float FOG_B_R = 0.65f, FOG_B_G = 0.72f, FOG_B_B = 0.95f;
     private static final float FOG_C_R = 0.15f, FOG_C_G = 0.19f, FOG_C_B = 0.36f;
 
-    /** Zone crossfade duration in seconds (block 14b), used by fog AND skybox. */
     private static final float ZONE_FADE_SECONDS = 1.2f;
 
-    // Reused per-frame scratch buffers for the fog lerp (no allocation in render()).
     private final float[] fogFrom = new float[3];
     private final float[] fogTo = new float[3];
 
@@ -62,26 +54,14 @@ public class MasterRenderer {
 
     private SkyboxRenderer skyboxRenderer;
 
-    /** Current fog/sky colour, lerped each frame by {@link #updateZoneFade()}. */
     private float fogR = FOG_A_R;
     private float fogG = FOG_A_G;
     private float fogB = FOG_A_B;
 
-    // Block 14b: zone crossfade state. MasterRenderer is the SINGLE source of
-    // truth — the skybox receives this state from render() so fog and skybox
-    // can never drift apart. Initial state: zoneFrom = zoneTo = 0 (morning),
-    // zoneBlend = 1 -> no startup fade.
     private int zoneFrom = 0;
     private int zoneTo = 0;
     private float zoneBlend = 1f;
 
-    /**
-     * Starts a zone crossfade when the zone actually changes (block 14b).
-     * Called by GameMain every frame with the same value — a no-op unless the
-     * zone differs from the current target. If a fade is still running it
-     * re-targets from the current target (zoneFrom = zoneTo) and restarts the
-     * blend at 0; a full fade then takes {@link #ZONE_FADE_SECONDS} seconds.
-     */
     public void setZone(int zone) {
         if (zone == zoneTo) {
             return;
@@ -89,18 +69,10 @@ public class MasterRenderer {
         zoneFrom = zoneTo;
         zoneTo = zone;
         zoneBlend = 0f;
-        // Locale.ROOT: keep the log format machine-readable regardless of the
-        // JVM default locale (e.g. es-ES would print "0,00").
         System.out.printf(Locale.ROOT, "SKYBOX FADE zone %d->%d blend %.2f (%.1fs)%n",
                 zoneFrom, zoneTo, zoneBlend, ZONE_FADE_SECONDS);
     }
 
-    /**
-     * Advances the zone fade by one frame delta and lerps fogR/fogG/fogB
-     * between the fog colours of zoneFrom and zoneTo. Called from render()
-     * before the fog is consumed (clearColor + every shader) so fog and
-     * skybox stay in sync.
-     */
     private void updateZoneFade() {
         zoneBlend = Math.min(1f,
                 zoneBlend + DisplayManager.getFrameTimeSeconds() / ZONE_FADE_SECONDS);
@@ -111,7 +83,6 @@ public class MasterRenderer {
         fogB = fogFrom[2] + (fogTo[2] - fogFrom[2]) * zoneBlend;
     }
 
-    /** Writes the fog RGB of the given zone (0 = A, 1 = B, 2 = C) into out. */
     private static void fogOfZone(int zone, float[] out) {
         switch (zone) {
             case 1 -> { out[0] = FOG_B_R; out[1] = FOG_B_G; out[2] = FOG_B_B; }
@@ -162,9 +133,6 @@ public class MasterRenderer {
     }
 
     public void render(List<Light> lights,Camera camera, Vector4f clipPlane){
-        // Block 14b: advance the zone crossfade BEFORE the fog is consumed, so
-        // clearColor (prepare), every shader's sky colour and the skybox blend
-        // all read the same interpolated values this frame.
         updateZoneFade();
         prepare();
         staticShader.start();

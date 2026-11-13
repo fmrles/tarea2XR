@@ -73,7 +73,6 @@ public class Particle {
     public boolean update(Camera camera) {
         velocity.y += Player.GRAVITY * gravityEffect * DisplayManager.getFrameTimeSeconds();
         Vector3f change = new Vector3f(velocity);
-        //System.out.println(change);
         change.mul(DisplayManager.getFrameTimeSeconds());
         position.add(change);
         Vector3f d = new Vector3f(position);

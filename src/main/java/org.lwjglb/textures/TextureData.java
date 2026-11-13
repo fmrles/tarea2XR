@@ -28,7 +28,6 @@ public class TextureData {
 		return buffer;
 	}
 
-	// Added as optimization, so we don't need to copy the buffer.
 	public void freeBuffer() {
 		STBImage.stbi_image_free(buffer);
 		buffer = null;

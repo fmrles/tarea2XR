@@ -34,14 +34,14 @@ public class ParticleSystem {
     }
 
     public void generateParticles(Vector3f systemCenter) {
-        float delta = DisplayManager.getFrameTimeSeconds(); //Tiempo que duró el frame actual (en segundos)
-        float particlesToCreate = pps * delta; //Calcular cuántas partículas crear
-        int count = (int) Math.floor(particlesToCreate); //Toma la parte entera
-        float partialParticle = particlesToCreate % 1; //Obtiene la parte decimal
-        for (int i = 0; i < count; i++) { //Crear partículas completas
+        float delta = DisplayManager.getFrameTimeSeconds(); 
+        float particlesToCreate = pps * delta; 
+        int count = (int) Math.floor(particlesToCreate); 
+        float partialParticle = particlesToCreate % 1; 
+        for (int i = 0; i < count; i++) { 
             emitParticle(systemCenter);
         }
-        if (Math.random() < partialParticle) { //Manejo probabilístico
+        if (Math.random() < partialParticle) { 
             emitParticle(systemCenter);
         }
     }
@@ -84,15 +84,12 @@ public class ParticleSystem {
 
         Vector4f direction = new Vector4f(x, y, z, 1);
         if (coneDirection.x != 0 || coneDirection.y != 0 || (coneDirection.z != 1 && coneDirection.z != -1)) {
-            //Vector3f rotateAxis = Vector3f.cross(coneDirection, new Vector3f(0, 0, 1), null);
             Vector3f rotateAxis = coneDirection.cross(new Vector3f(0, 0, 1));
             rotateAxis.normalize();
-            //float rotateAngle = (float) Math.acos(Vector3f.dot(coneDirection, new Vector3f(0, 0, 1)));
             double dotProduct = coneDirection.dot(new Vector3f(0, 0, 1));
             float rotateAngle = (float) Math.acos(dotProduct);
             Matrix4f rotationMatrix = new Matrix4f();
             rotationMatrix.rotate(-rotateAngle, rotateAxis);
-            //Matrix4f.transform(rotationMatrix, direction, direction);
             direction = rotationMatrix.transform(direction);
         } else if (coneDirection.z == -1) {
             direction.z *= -1;
@@ -109,10 +106,6 @@ public class ParticleSystem {
         return new Vector3f(x, y, z);
     }
 
-    /**
-     * @param direction - The average direction in which particles are emitted.
-     * @param deviation - A value between 0 and 1 indicating how far from the chosen direction particles can deviate.
-     */
     public void setDirection(Vector3f direction, float deviation) {
         this.direction = new Vector3f(direction);
         this.directionDeviation = (float) (deviation * Math.PI);
@@ -122,26 +115,14 @@ public class ParticleSystem {
         randomRotation = true;
     }
 
-    /**
-     * @param error
-     *            - A number between 0 and 1, where 0 means no error margin.
-     */
     public void setSpeedError(float error) {
         this.speedError = error * averageSpeed;
     }
 
-    /**
-     * @param error
-     *            - A number between 0 and 1, where 0 means no error margin.
-     */
     public void setLifeError(float error) {
         this.lifeError = error * averageLifeLength;
     }
 
-    /**
-     * @param error
-     *            - A number between 0 and 1, where 0 means no error margin.
-     */
     public void setScaleError(float error) {
         this.scaleError = error * averageScale;
     }

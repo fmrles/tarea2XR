@@ -25,7 +25,6 @@ public class TextMaster {
 		renderer.render(texts);
 	}
 
-	/** Debug: how many texts are queued for rendering right now. */
 	public static int getTextCount() {
 		int total = 0;
 		for (List<GUIText> batch : texts.values()) {

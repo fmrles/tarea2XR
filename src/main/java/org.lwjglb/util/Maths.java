@@ -11,7 +11,6 @@ public class Maths {
         Matrix4f matrix = new Matrix4f();
         matrix.translate(translation.x, translation.y, 0);
         matrix.scale(scale.x, scale.y, 1.0f);
-        //matrix.transpose();
         return matrix;
     }
 
@@ -31,7 +30,6 @@ public class Maths {
         viewMatrix.identity();
         viewMatrix.rotate((float) Math.toRadians(camera.getPitch()), new Vector3f(1, 0, 0));
         viewMatrix.rotate((float) Math.toRadians(camera.getYaw()), new Vector3f(0, 1, 0));
-        //viewMatrix.rotate((float) Math.toRadians(camera.getRoll()), new Vector3f(0, 0, 1));
         Vector3f cameraPos = camera.getPosition();
         Vector3f negativeCameraPos = new Vector3f(-cameraPos.x, -cameraPos.y, -cameraPos.z);
         viewMatrix.translate(negativeCameraPos);

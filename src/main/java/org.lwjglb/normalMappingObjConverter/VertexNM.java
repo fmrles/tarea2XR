@@ -29,7 +29,6 @@ public class VertexNM {
 		tangents.add(tangent);
 	}
 	
-	//NEW
 	protected VertexNM duplicate(int newIndex){
 		VertexNM vertex = new VertexNM(newIndex, position);
 		vertex.tangents = this.tangents;
@@ -41,7 +40,6 @@ public class VertexNM {
 			return;
 		}
 		for(Vector3f tangent : tangents){
-			//Vector3f.add(averagedTangent, tangent, averagedTangent);
 			averagedTangent.add(tangent);
 		}
 		averagedTangent.normalize();

@@ -36,7 +36,6 @@ public class ParticleRenderer {
 		for (ParticleTexture texture : particles.keySet()) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
-			// One tint per ParticleTexture: load right where the batch texture is bound.
 			shader.loadTintColour(texture.getColour());
 			for (Particle particle : particles.get(texture)) {
 				updateModelViewMatrix(particle.getPosition(), particle.getRotation(), particle.getScale(), viewMatrix);
@@ -51,12 +50,8 @@ public class ParticleRenderer {
 	private void updateModelViewMatrix(Vector3f position, float rotation, float scale, Matrix4f viewMatrix) {
 		Matrix4f modelMatrix = new Matrix4f();
 
-		// Matrix4f.translate(position, modelMatrix, modelMatrix);
 		modelMatrix.translate(position);
 
-		// Sets the rotation 3x3 part of the model matrix to the transpose
-		// of the 3x3 rotation part of the view matrix.
-		// See video OpenGL 3D Game Tutorial 34: Particle Effects at about 8 minutes.
 		modelMatrix.m00(viewMatrix.m00());
 		modelMatrix.m01(viewMatrix.m10());
 		modelMatrix.m02(viewMatrix.m20());
@@ -67,12 +62,8 @@ public class ParticleRenderer {
 		modelMatrix.m21(viewMatrix.m12());
 		modelMatrix.m22(viewMatrix.m22());
 
-		// Matrix4f.rotate((float)Math.toRadians(rotation), new Vector3f(0, 0, 1), modelMatrix, modelMatrix);
-		// Matrix4f.mul(new Vector3f(scale, scale, scale), modelMatrix, modelMatrix);
-		// Matrix4f modelViewMatrix = Matrix4f.mul(viewMatrix, modelMatrix, null);
 		modelMatrix.rotate((float)Math.toRadians(rotation), new Vector3f(0, 0, 1));
 		modelMatrix.scale(scale, scale, scale);
-		//Matrix4f modelViewMatrix = viewMatrix.mul(modelMatrix);
 
 		Matrix4f modelViewMatrix = new Matrix4f(viewMatrix).mul(modelMatrix);
 		shader.loadModelViewMatrix(modelViewMatrix);

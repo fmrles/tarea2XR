@@ -51,8 +51,6 @@ public class TerrainShader extends ShaderProgram {
         location_transformationMatrix = super.getUniformLocation("transformationMatrix");
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_viewMatrix = super.getUniformLocation("viewMatrix");
-        //location_lightPosition = super.getUniformLocation("lightPosition");
-        //location_lightColour = super.getUniformLocation("lightColour");
         location_shineDamper = super.getUniformLocation("shineDamper");
         location_reflectivity = super.getUniformLocation("reflectivity");
         location_skyColour = super.getUniformLocation("skyColour");
@@ -88,8 +86,6 @@ public class TerrainShader extends ShaderProgram {
         super.loadInt(location_blendMap, 4);
     }
 
-    // Block 11: corridor UV mapping constants for the road (b slot); values
-    // documented and owned by TerrainRenderer, which calls this once at init.
     public void loadRoadMapping(float roadU0, float roadSpanU, float roadVRepeat){
         super.loadFloat(location_roadU0, roadU0);
         super.loadFloat(location_roadSpanU, roadSpanU);

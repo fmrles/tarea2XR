@@ -53,11 +53,9 @@ public class MainGameLoop {
 		List<Terrain> terrains = new ArrayList<Terrain>();
 		List<Light> lights = new ArrayList<>();
 
-		//Iluminacion
 		Light light = new Light(new Vector3f(10000,10000,10000), new Vector3f(1,1,1));
 		lights.add(light);
 
-		//Personaje principal
 		TexturedModel playerModel = loader.createTexturedModel(
 				"person",
 				"playerTexture",
@@ -247,7 +245,6 @@ public class MainGameLoop {
 		model.crearShader();
 		model.setActiveAnimationIndex(1);
 
-		// BUCLE PRINCIPAL
 		while (!glfwWindowShouldClose(DisplayManager.window)) {
 			player.move(terrain);
 

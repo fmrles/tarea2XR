@@ -67,7 +67,7 @@ public class NormalMappedObjLoader {
 				VertexNM v0 = processVertex(vertex1, vertices, indices);
 				VertexNM v1 = processVertex(vertex2, vertices, indices);
 				VertexNM v2 = processVertex(vertex3, vertices, indices);
-				calculateTangents(v0, v1, v2, textures);//NEW
+				calculateTangents(v0, v1, v2, textures);
 				line = reader.readLine();
 			}
 			reader.close();
@@ -83,39 +83,16 @@ public class NormalMappedObjLoader {
 				texturesArray, normalsArray, tangentsArray);
 		int[] indicesArray = convertIndicesListToArray(indices);
 
-		// Block 17: upload tangents too (attribute 3) — the normal-map shader
-		// needs them to build the per-vertex TBN matrix.
 		return loader.loadToVAO(verticesArray, texturesArray, normalsArray, tangentsArray,
 				indicesArray);
 	}
 
-	//NEW 
 	private static void calculateTangents(VertexNM v0, VertexNM v1, VertexNM v2,
 			List<Vector2f> textures) {
 
-/*
-				Vector3f delatPos1 = Vector3f.sub(v1.getPosition(), v0.getPosition(), null);
-		Vector3f delatPos2 = Vector3f.sub(v2.getPosition(), v0.getPosition(), null);
-		Vector2f uv0 = textures.get(v0.getTextureIndex());
-		Vector2f uv1 = textures.get(v1.getTextureIndex());
-		Vector2f uv2 = textures.get(v2.getTextureIndex());
-		Vector2f deltaUv1 = Vector2f.sub(uv1, uv0, null);
-		Vector2f deltaUv2 = Vector2f.sub(uv2, uv0, null);
 
-		float r = 1.0f / (deltaUv1.x * deltaUv2.y - deltaUv1.y * deltaUv2.x);
-		delatPos1.scale(deltaUv2.y);
-		delatPos2.scale(deltaUv1.y);
-		Vector3f tangent = Vector3f.sub(delatPos1, delatPos2, null);
-		tangent.scale(r);
-		v0.addTangent(tangent);
-		v1.addTangent(tangent);
-		v2.addTangent(tangent);
-*/
-
-		// Vector3f deltaPos1 = Vector3f.sub(v1.getPosition(), v0.getPosition(), null);
 		Vector3f deltaPos1 = new Vector3f(v1.getPosition());
 		deltaPos1.sub(v0.getPosition());
-		// Vector3f deltaPos2 = Vector3f.sub(v2.getPosition(), v0.getPosition(), null);
 		Vector3f deltaPos2 = new Vector3f(v2.getPosition());
 		deltaPos2.sub(v0.getPosition());
 
@@ -123,18 +100,15 @@ public class NormalMappedObjLoader {
 		Vector2f uv1 = textures.get(v1.getTextureIndex());
 		Vector2f uv2 = textures.get(v2.getTextureIndex());
 
-		// Vector2f deltaUv1 = Vector2f.sub(uv1, uv0, null);
 		Vector2f deltaUv1 = new Vector2f(uv1);
 		deltaUv1.sub(uv0);
-		// Vector2f deltaUv2 = Vector2f.sub(uv2, uv0, null);
 		Vector2f deltaUv2 = new Vector2f(uv2);
-		deltaUv2.sub(uv0);   // block 17: was deltaUv1.sub(uv0) — double-subtracted uv1, left uv2 unoffset (garbage tangents)
+		deltaUv2.sub(uv0);   
 
 		float r = 1.0f / (deltaUv1.x * deltaUv2.y - deltaUv1.y * deltaUv2.x);
 		deltaPos1.mul(deltaUv2.y);
 		deltaPos2.mul(deltaUv1.y);
 
-		// Vector3f tangent = Vector3f.sub(deltaPos1, deltaPos2, null);
 		Vector3f tangent = new Vector3f(deltaPos1);
 		tangent.sub(deltaPos2);
 
@@ -209,7 +183,7 @@ public class NormalMappedObjLoader {
 				return dealWithAlreadyProcessedVertex(anotherVertex, newTextureIndex,
 						newNormalIndex, indices, vertices);
 			} else {
-				VertexNM duplicateVertex = previousVertex.duplicate(vertices.size());//NEW
+				VertexNM duplicateVertex = previousVertex.duplicate(vertices.size());
 				duplicateVertex.setTextureIndex(newTextureIndex);
 				duplicateVertex.setNormalIndex(newNormalIndex);
 				previousVertex.setDuplicateVertex(duplicateVertex);

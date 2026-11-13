@@ -26,7 +26,6 @@ public class Texture {
     private int load(String texturePath) throws IOException {
         int result;
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            //this.texturePath = texturePath;
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -51,7 +50,6 @@ public class Texture {
         int textureId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
         glBindTexture(GL_TEXTURE_2D, 0);
         return textureId;

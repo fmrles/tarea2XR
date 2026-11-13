@@ -20,9 +20,6 @@ uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
 
-// Block 11: corridor mapping for the road (b slot) only. roadU0/roadSpanU
-// remap terrain UV.x onto the blue corridor strip of blendMapPuerto so the
-// asphalt markings land on the road; roadVRepeat keeps tiles square along z.
 uniform float roadU0;
 uniform float roadSpanU;
 uniform float roadVRepeat;
@@ -35,14 +32,6 @@ void main(void){
     vec4 backgroundTextureColour = texture(backgroundTexture, tiledCoords) * backTextureAmount;
     vec4 rTextureColour = texture(rTexture, tiledCoords) * blendMapColour.r;
     vec4 gTextureColour = texture(gTexture, tiledCoords) * blendMapColour.g;
-    // Block 11: only the road (b slot) gets corridor-mapped coords; background,
-    // r and g keep the *40 tiling above. roadCoords.x runs 0..1 across the
-    // corridor (terrain UV roadU0..roadU0+roadSpanU), so the texture's yellow
-    // center line (image u ~= 0.5) sits at roadCoords.x 0.5 == terrain UV 0.5
-    // == world x 75 = lane 1 center; the white edge lines (image u ~= 0.086 /
-    // 0.913) land at world x ~= 60.5 / 89.5, just inside the corridor edges
-    // 57.42 / 92.58. roadCoords.y repeats the texture every 1/roadSpanU terrain
-    // UV units so tiles stay square in world space (see TerrainRenderer).
     vec2 roadCoords = vec2((pass_textureCoordinates.x - roadU0) / roadSpanU,
                            pass_textureCoordinates.y * roadVRepeat);
     vec4 bTextureColour = texture(bTexture, roadCoords) * blendMapColour.b;

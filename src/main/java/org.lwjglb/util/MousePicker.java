@@ -69,10 +69,8 @@ public class MousePicker {
     }
 
     private Vector4f toEyeCoords(Vector4f clipCoords) {
-        Matrix4f localProjMatrix = new Matrix4f(); // Matriz temporal
-        // Deep-copy de la matriz de proyección
+        Matrix4f localProjMatrix = new Matrix4f(); 
         localProjMatrix.set(projectionMatrix);
-        // Resto de la función original
         Matrix4f invertedProjection = localProjMatrix.invert();
         Vector4f eyeCoords = invertedProjection.transform(clipCoords);
         return new Vector4f(eyeCoords.x, eyeCoords.y, -1f, 0f);
@@ -82,17 +80,15 @@ public class MousePicker {
     private Vector2f getNormalisedDeviceCoordinates(float mouseX, float mouseY) {
         float x = (2.0f * mouseX) / DisplayManager.getWindowWidth() - 1f;
         float y = (2.0f * mouseY) / DisplayManager.getWindowHeight() - 1f;
-        //System.out.println("norm x: " + x + "   norm y: " + y);
         return new Vector2f(x, y);
     }
 
-    //**********************************************************
 
     private Vector3f getPointOnRay(Vector3f ray, float distance) {
         Vector3f camPos = camera.getPosition();
         Vector3f start = new Vector3f(camPos.x, camPos.y, camPos.z);
         Vector3f scaledRay = new Vector3f(ray.x * distance, ray.y * distance, ray.z * distance);
-        return start.add(scaledRay);  //Vector3f.add(start, scaledRay, null);
+        return start.add(scaledRay);  
     }
 
     private Vector3f binarySearch(int count, float start, float finish, Vector3f ray) {

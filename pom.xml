@@ -65,7 +65,6 @@
       <version>${imgui-java.version}</version>
     </dependency>
 
-    <!-- Natives -->
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl</artifactId>

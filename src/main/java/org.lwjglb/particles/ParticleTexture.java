@@ -6,7 +6,6 @@ public class ParticleTexture {
 
     private int textureID;
     private int numberOfRows;
-    /** Per-texture tint multiplied into the sampled RGB (alpha untouched). */
     private Vector3f colour;
 
     public ParticleTexture(int textureID, int numberOfRows) {

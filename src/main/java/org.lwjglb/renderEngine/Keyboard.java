@@ -9,7 +9,7 @@ public class Keyboard extends GLFWKeyCallback {
 
     @Override
     public void invoke(long window, int key, int scancode, int action, int mods) {
-        if (key < 0) { // <- ❗️ IMPORTANT: This line is added to prevent `ArrayIndexOutOfBoundsException` in some cases.
+        if (key < 0) { 
             return;
         }
         keys[key] = action != GLFW_RELEASE;

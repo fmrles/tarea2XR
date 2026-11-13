@@ -92,23 +92,16 @@ public class OBJFileLoader {
         float[] texturesArray = new float[vertices.size() * 2];
         float[] normalsArray = new float[vertices.size() * 3];
         float[] tangentsArray = new float[vertices.size() * 3];
-        //float furthest =
         convertDataToArrays(vertices, textures, normals, verticesArray,
                 texturesArray, normalsArray, tangentsArray);
         int[] indicesArray = convertIndicesListToArray(indices);
-        // ModelData data = new ModelData(verticesArray, texturesArray,
-        // normalsArray, tangentsArray, indicesArray,
-        // furthest);
         return loader.loadToVAO(verticesArray, texturesArray, normalsArray, indicesArray);
     }
 
-    // Changed scale() to mul()
     private static void calculateTangents(Vertex v0, Vertex v1, Vertex v2,
                                           List<Vector2f> textures) {
-        // Vector3f deltaPos1 = Vector3f.sub(v1.getPosition(), v0.getPosition(), null);
         Vector3f deltaPos1 = new Vector3f(v1.getPosition());
         deltaPos1.sub(v0.getPosition());
-        // Vector3f deltaPos2 = Vector3f.sub(v2.getPosition(), v0.getPosition(), null);
         Vector3f deltaPos2 = new Vector3f(v2.getPosition());
         deltaPos2.sub(v0.getPosition());
 
@@ -116,10 +109,8 @@ public class OBJFileLoader {
         Vector2f uv1 = textures.get(v1.getTextureIndex());
         Vector2f uv2 = textures.get(v2.getTextureIndex());
 
-        // Vector2f deltaUv1 = Vector2f.sub(uv1, uv0, null);
         Vector2f deltaUv1 = new Vector2f(uv1);
         deltaUv1.sub(uv0);
-        // Vector2f deltaUv2 = Vector2f.sub(uv2, uv0, null);
         Vector2f deltaUv2 = new Vector2f(uv2);
         deltaUv1.sub(uv0);
 
@@ -127,7 +118,6 @@ public class OBJFileLoader {
         deltaPos1.mul(deltaUv2.y);
         deltaPos2.mul(deltaUv1.y);
 
-        // Vector3f tangent = Vector3f.sub(deltaPos1, deltaPos2, null);
         Vector3f tangent = new Vector3f(deltaPos1);
         tangent.sub(deltaPos2);
 
@@ -140,9 +130,6 @@ public class OBJFileLoader {
     private static Vertex processVertex(String[] vertex, List<Vertex> vertices,
                                         List<Integer> indices) {
 
-        //System.out.println("vertex[0] = " + vertex[0]);
-        //System.out.println("vertex[1] = " + vertex[1]);
-        //System.out.println("vertex[2] = " + vertex[2]);
 
         int index = Integer.parseInt(vertex[0]) - 1;
         Vertex currentVertex = vertices.get(index);

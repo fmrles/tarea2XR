@@ -10,12 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/**
- * Provides functionality for getting the values from a font file.
- * 
- * @author Karl
- *
- */
 public class MetaFile {
 
 	private static final int PAD_TOP = 0;
@@ -42,12 +36,6 @@ public class MetaFile {
 	private BufferedReader reader;
 	private Map<String, String> values = new HashMap<String, String>();
 
-	/**
-	 * Opens a font file in preparation for reading.
-	 * 
-	 * @param file
-	 *            - the font file.
-	 */
 	protected MetaFile(File file) {
 		this.aspectRatio = (double) DisplayManager.getWindowWidth() / (double) DisplayManager.getWindowHeight();
 		openFile(file);
@@ -66,11 +54,6 @@ public class MetaFile {
 		return metaData.get(ascii);
 	}
 
-	/**
-	 * Read in the next line and store the variable values.
-	 * 
-	 * @return {@code true} if the end of the file hasn't been reached.
-	 */
 	private boolean processNextLine() {
 		values.clear();
 		String line = null;
@@ -90,25 +73,10 @@ public class MetaFile {
 		return true;
 	}
 
-	/**
-	 * Gets the {@code int} value of the variable with a certain name on the
-	 * current line.
-	 * 
-	 * @param variable
-	 *            - the name of the variable.
-	 * @return The value of the variable.
-	 */
 	private int getValueOfVariable(String variable) {
 		return Integer.parseInt(values.get(variable));
 	}
 
-	/**
-	 * Gets the array of ints associated with a variable on the current line.
-	 * 
-	 * @param variable
-	 *            - the name of the variable.
-	 * @return The int array of values associated with the variable.
-	 */
 	private int[] getValuesOfVariable(String variable) {
 		String[] numbers = values.get(variable).split(NUMBER_SEPARATOR);
 		int[] actualValues = new int[numbers.length];
@@ -118,9 +86,6 @@ public class MetaFile {
 		return actualValues;
 	}
 
-	/**
-	 * Closes the font file after finishing reading.
-	 */
 	private void close() {
 		try {
 			reader.close();
@@ -129,12 +94,6 @@ public class MetaFile {
 		}
 	}
 
-	/**
-	 * Opens the font file, ready for reading.
-	 * 
-	 * @param file
-	 *            - the font file.
-	 */
 	private void openFile(File file) {
 		try {
 			reader = new BufferedReader(new FileReader(file));
@@ -144,10 +103,6 @@ public class MetaFile {
 		}
 	}
 
-	/**
-	 * Loads the data about how much padding is used around each character in
-	 * the texture atlas.
-	 */
 	private void loadPaddingData() {
 		processNextLine();
 		this.padding = getValuesOfVariable("padding");
@@ -155,11 +110,6 @@ public class MetaFile {
 		this.paddingHeight = padding[PAD_TOP] + padding[PAD_BOTTOM];
 	}
 
-	/**
-	 * Loads information about the line height for this font in pixels, and uses
-	 * this as a way to find the conversion rate between pixels in the texture
-	 * atlas and screen-space.
-	 */
 	private void loadLineSizes() {
 		processNextLine();
 		int lineHeightPixels = getValueOfVariable("lineHeight") - paddingHeight;
@@ -167,13 +117,6 @@ public class MetaFile {
 		horizontalPerPixelSize = verticalPerPixelSize / aspectRatio;
 	}
 
-	/**
-	 * Loads in data about each character and stores the data in the
-	 * {@link Character} class.
-	 * 
-	 * @param imageWidth
-	 *            - the width of the texture atlas in pixels.
-	 */
 	private void loadCharacterData(int imageWidth) {
 		processNextLine();
 		processNextLine();
@@ -185,15 +128,6 @@ public class MetaFile {
 		}
 	}
 
-	/**
-	 * Loads all the data about one character in the texture atlas and converts
-	 * it all from 'pixels' to 'screen-space' before storing. The effects of
-	 * padding are also removed from the data.
-	 * 
-	 * @param imageSize
-	 *            - the size of the texture atlas in pixels.
-	 * @return The data about the character.
-	 */
 	private Character loadCharacter(int imageSize) {
 		int id = getValueOfVariable("id");
 		if (id == TextMeshCreator.SPACE_ASCII) {

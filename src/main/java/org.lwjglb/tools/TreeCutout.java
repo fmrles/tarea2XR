@@ -5,53 +5,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayDeque;
 
-/**
- * Block 9 A3: colour-key the two Meshy tree billboards into cut-out PNGs for
- * the crossed-quad trees of RunnerCore.
- *
- * <p>Headless and standalone: no LWJGL/OpenGL imports, run with plain
- * {@code java org.lwjglb.tools.TreeCutout} from the project root (same shape
- * as {@link HeightmapGenerator}: {@code main} + self-check, prints stats,
- * exits 0/1). It writes {@code assets/arbol1_cut.png} and
- * {@code assets/arbol2_cut.png}; the originals are left untouched.
- *
- * <p><b>Why a flood fill and not a flat colour key.</b> The raw PNGs are
- * 1024x1024 ARGB with {@code alpha = 255} everywhere (no usable alpha) and a
- * solid grey backdrop ≈ RGB(126,127,126). A flat "delete every pixel within
- * 35 of the backdrop colour" key would also punch holes through grey pixels
- * that legitimately live INSIDE the tree (trunk shading, gaps between
- * leaves). So the key is seeded only from the image BORDER and grown with a
- * 4-neighbour BFS: only background that is CONNECTED to the outside is
- * removed, interior grey survives.
- *
- * <p><b>Feather.</b> Surviving pixels that touch a removed pixel and sit
- * within {@link #FEATHER_DIST} of the backdrop colour get their alpha ramped
- * proportionally from 0 (at {@link #KEY_DIST}) to 255 (at
- * {@link #FEATHER_DIST}), which anti-aliases the silhouette instead of
- * leaving a hard grey fringe. 8-neighbourhood for the feather (4-neighbour
- * BFS for connectivity) so diagonal edges do not stair-step.
- *
- * <p>Self-check: prints the keyed/transparent percentages (expected band
- * ~30-70 %), asserts that more than 10 % of the pixels ended up fully
- * transparent and that the image centre is still opaque, and prints the
- * bounding box of the surviving tree - the number RunnerCore needs to size
- * the billboard quad.
- */
 public final class TreeCutout {
 
     private static final String ASSETS = "src/main/java/org.lwjglb/assets/";
 
-    /** Measured backdrop: solid grey, R=126 G=127 B=126, alpha 255. */
     private static final int BG_R = 126;
     private static final int BG_G = 127;
     private static final int BG_B = 126;
 
-    /** Euclidean RGB distance at (or below) which a pixel counts as backdrop. */
     private static final double KEY_DIST = 35.0;
-    /** Backdrop-near pixels beyond this distance keep full opacity. */
     private static final double FEATHER_DIST = 60.0;
 
-    /** Minimum share of fully transparent pixels the cut-out must produce. */
     private static final double MIN_TRANSPARENT = 0.10;
 
     private static final String[] TREES = {"arbol1", "arbol2"};
@@ -76,7 +40,6 @@ public final class TreeCutout {
         System.exit(ok ? 0 : 1);
     }
 
-    /** Colour-key one tree, write {@code <name>_cut.png}, run the self-check. */
     private static boolean cut(String name) throws Exception {
         File src = new File(ASSETS + name + ".png");
         BufferedImage img = ImageIO.read(src);
@@ -89,7 +52,6 @@ public final class TreeCutout {
         int n = w * h;
         int[] argb = img.getRGB(0, 0, w, h, null, 0, w);
 
-        // ---- per-pixel Euclidean distance to the backdrop colour ----
         double[] dist = new double[n];
         for (int i = 0; i < n; i++) {
             int p = argb[i];
@@ -99,7 +61,6 @@ public final class TreeCutout {
             dist[i] = Math.sqrt(dr * dr + dg * dg + db * db);
         }
 
-        // ---- border-seeded 4-neighbour flood fill ----
         boolean[] removed = new boolean[n];
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         for (int x = 0; x < w; x++) {
@@ -120,7 +81,6 @@ public final class TreeCutout {
             if (y < h - 1) grow(i + w, dist, removed, queue);
         }
 
-        // ---- feather pass + alpha rewrite ----
         int[] out = new int[n];
         int keyed = 0;
         int transparent = 0;
@@ -159,7 +119,6 @@ public final class TreeCutout {
         result.setRGB(0, 0, w, h, out, 0, w);
         ImageIO.write(result, "png", dst);
 
-        // ---- stats ----
         int corner = argb[0];
         int centreAlpha = (out[(h / 2) * w + (w / 2)] >>> 24) & 0xFF;
         double keyedPct = 100.0 * keyed / n;
@@ -176,7 +135,6 @@ public final class TreeCutout {
                 100.0 * boxW / w, 100.0 * boxH / h,
                 dst.getPath());
 
-        // ---- self-check ----
         boolean ok = true;
         if (transparentPct <= MIN_TRANSPARENT * 100.0) {
             System.out.printf("FAIL %s: only %.1f%% transparent (need > %.0f%%)%n",
@@ -202,7 +160,6 @@ public final class TreeCutout {
         return b ? "OK" : "BAD";
     }
 
-    /** Queue a border pixel when it is within the key distance of the backdrop. */
     private static void seed(int w, int x, int y, double[] dist, boolean[] removed,
                              ArrayDeque<Integer> queue) {
         int i = y * w + x;
@@ -219,7 +176,6 @@ public final class TreeCutout {
         }
     }
 
-    /** True when any of the 8 neighbours has been keyed away. */
     private static boolean touchesRemoved(int x, int y, int w, int h, boolean[] removed) {
         for (int dy = -1; dy <= 1; dy++) {
             int ny = y + dy;

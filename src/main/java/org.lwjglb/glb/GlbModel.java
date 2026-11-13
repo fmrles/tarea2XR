@@ -81,26 +81,9 @@ import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjglb.shaders.ShaderProgram.matrixBuffer;
 
 public class GlbModel {
-    // Variables auxiliares
     public int shaderProgram;
 
     private static final int MAX_BONES = 200;
-    /*
-     * Block 8: these used to be STATIC, i.e. shared by every GlbModel.
-     * crearShader() writes glGetUniformLocation(...) results into them, and
-     * glGetUniformLocation returns locations PER PROGRAM OBJECT: with six rat
-     * models each linking its own shaderProgram, the last crearShader() call
-     * would decide the locations used when rendering ALL models. The GL spec
-     * does not guarantee that two programs compiled from identical source get
-     * identical uniform locations (drivers usually do, but it is
-     * implementation-defined), so on such a driver the bone matrices / MVP /
-     * color would silently upload to the wrong uniforms (or raise
-     * GL_INVALID_OPERATION). Making them instance fields is purely mechanical:
-     * every read/write already happens on "this" (crearShader, render,
-     * renderNode, the three enviar* helpers), and for the single-model
-     * chaos/MainGameLoop path the values are identical, so behavior is
-     * unchanged there.
-     */
     private int[] locationBones;
     private int locationMVPMatrix;
     private int locationColor;
@@ -110,8 +93,6 @@ public class GlbModel {
     public int locationTextureSampler;
     public int locationLightDirection;
 
-    // Métodos auxiliares (block 8: instance methods, they read the instance
-    // uniform locations above - see the note there)
     private void enviarBoneMatrix(int index, Matrix4f matrix) {
         if (index < 0 || index >= locationBones.length) return;
         matrixBuffer.clear();
@@ -131,10 +112,6 @@ public class GlbModel {
         glUniformMatrix4fv(locationModelMatrix, false, matrixBuffer);
     }
 
-    /*******************************************************************************************
-     }
-     Estructuras de animación.
-     ******************************************************************************************/
     private static class Node {
         private final String name;
         private final Matrix4f localTransform;
@@ -345,10 +322,6 @@ public class GlbModel {
         }
     }
 
-    /*******************************************************************************************
-     Textura OpenGL.
-     Permite usar texturas embebidas en el GLB o texturas externas referenciadas por el material.
-     ******************************************************************************************/
     private static class Texture {
         private final int id;
 
@@ -415,15 +388,6 @@ public class GlbModel {
         }
     }
 
-    /*******************************************************************************************
-     Submalla renderizable.
-     Cada vértice almacena:
-     - position: 3 floats
-     - normal:   3 floats
-     - texCoord: 2 floats
-     - boneIds:  4 floats
-     - weights:  4 floats
-     ******************************************************************************************/
     private static class GlbMesh {
 
         private static final int FLOATS_PER_VERTEX = 16;
@@ -435,7 +399,7 @@ public class GlbModel {
         private final int materialIndex;
         private final float[] color;
         private final boolean hasBones;
-        private final float[] vertexData; // copia en CPU, usada para medir el modelo
+        private final float[] vertexData; 
 
         public GlbMesh(float[] vertexData, int materialIndex, float[] color, boolean hasBones) {
             this.vertexData = vertexData;
@@ -503,7 +467,6 @@ public class GlbModel {
     private final String[] animationNames;
     private org.joml.Vector3f centerOffset;
     private float recommendedScale;
-    /** Block 8: rest-pose bounding-box size (model units), see {@link #getRestPoseSize()}. */
     private org.joml.Vector3f restPoseSize;
     private final List<BoneInfo> boneInfos;
     private final Map<String, Integer> boneIndexByName;
@@ -511,13 +474,6 @@ public class GlbModel {
 
     private volatile int activeAnimationIndex = 0;
     private double animationTimeSeconds = 0.0;
-    /*
-     * Block 8: when false, render() clamps the playhead to the clip duration
-     * instead of wrapping it modulo, so a one-shot clip (knock-down, death)
-     * HOLDS its final pose instead of restarting. Default true, so existing
-     * callers that never call setLooping() keep the exact looping behavior
-     * (chaos/MainGameLoop precedent unchanged).
-     */
     private boolean looping = true;
 
     private GlbModel(List<GlbMesh> meshes,
@@ -542,15 +498,6 @@ public class GlbModel {
         computeFraming();
     }
 
-    /*
-     * Calcula el encuadre (escala y desplazamiento) del modelo.
-     *
-     * Se mide con EXACTAMENTE la misma matemática que se usa al dibujar: las mallas con
-     * huesos pasan por el skinning en la CPU (pose de reposo) y las mallas sin huesos usan
-     * la transformación global de su nodo. Así el tamaño medido coincide siempre con el
-     * tamaño dibujado, sin importar cómo vengan escaladas la jerarquía o las matrices
-     * de enlace (inverse bind matrices) del GLB.
-     */
     private void computeFraming() {
         Bounds bounds = calculatePoseBounds(null, 0.0);
 
@@ -571,17 +518,8 @@ public class GlbModel {
         restPoseSize = new org.joml.Vector3f(sizeX, sizeY, sizeZ);
         float maxSize = Math.max(sizeX, Math.max(sizeY, sizeZ));
 
-        /*
-         * Aumenta el tamaño visual del modelo sin modificar la cámara
-         * ni la proyección: el lado más grande del modelo mide 4.6 unidades.
-         */
         recommendedScale = maxSize > 0.0f ? 4.6f / maxSize : 1.0f;
 
-        /*
-         * La cámara original mira al punto y=1.0.
-         * Para que el espectador vea el modelo justo frente a él,
-         * se desplaza el centro visual del modelo a ese mismo punto.
-         */
         float cameraTargetY = 1.0f;
         centerOffset = new org.joml.Vector3f(
                 -centerX,
@@ -589,7 +527,6 @@ public class GlbModel {
                 -centerZ
         );
 
-        // Diagnóstico: permite comparar el tamaño en reposo con el de cada animación.
         System.out.printf("Encuadre (pose de reposo): tamaño = %.3f x %.3f x %.3f, escala = %.4f%n",
                 sizeX, sizeY, sizeZ, recommendedScale);
 
@@ -632,7 +569,6 @@ public class GlbModel {
                 Vector3f p = new Vector3f(data[o], data[o + 1], data[o + 2]);
 
                 if (mesh.hasBones) {
-                    // Igual que el vertex shader: mezcla de matrices de hueso ponderada.
                     float weightSum = data[o + 12] + data[o + 13] + data[o + 14] + data[o + 15];
 
                     if (weightSum > 0.0f) {
@@ -650,7 +586,6 @@ public class GlbModel {
 
                         p = skinned;
                     }
-                    // Con huesos NO se aplica la transformación del nodo (ver renderNode).
                 } else {
                     globalTransform.transformPosition(p);
                 }
@@ -771,7 +706,6 @@ public class GlbModel {
             Node root = loadNode(scene.mRootNode());
             List<Animation> loadedAnimations = loadAnimations(scene);
 
-            // El encuadre (escala y centrado) lo calcula el propio GlbModel en su constructor.
             return new GlbModel(loadedMeshes, materialTextures, root, loadedAnimations,
                     boneInfos, boneIndexByName);
         } finally {
@@ -1028,12 +962,6 @@ public class GlbModel {
         animationTimeSeconds = 0.0;
     }
 
-    /**
-     * Block 8: selects between looping playback (default, wraps modulo the
-     * clip duration - existing behavior) and one-shot playback that clamps
-     * at the end so the last pose is held. Additive only: not calling this
-     * method changes nothing.
-     */
     public void setLooping(boolean looping) {
         this.looping = looping;
     }
@@ -1059,12 +987,6 @@ public class GlbModel {
                 if (looping) {
                     ticks = ticks % activeAnimation.duration;
                 } else {
-                    /*
-                     * Block 8: clamp instead of wrap so a one-shot clip holds
-                     * its final pose. At ticks == duration the interpolators
-                     * land exactly on the last key (find*Key returns the
-                     * second-to-last interval and the factor clamps to 1).
-                     */
                     ticks = Math.min(ticks, activeAnimation.duration);
                 }
             }
@@ -1090,13 +1012,6 @@ public class GlbModel {
         Integer boneIndex = boneIndexByName.get(node.name);
         if (boneIndex != null && boneIndex >= 0 && boneIndex < MAX_BONES) {
             BoneInfo boneInfo = boneInfos.get(boneIndex);
-            /*
-             * En glTF, la posición final de un vértice con skinning es:
-             *     jointGlobal * inverseBindMatrix * vértice
-             * Assimp entrega la inverseBindMatrix en mOffsetMatrix.
-             * No se debe multiplicar por la inversa del nodo raíz: esa fórmula viene de
-             * FBX/Collada y rompe la escala cuando la jerarquía del GLB tiene escalas.
-             */
             finalBoneMatrices[boneIndex] = new Matrix4f(globalTransform)
                     .mul(boneInfo.offsetMatrix);
         }
@@ -1117,13 +1032,6 @@ public class GlbModel {
             GlbMesh mesh = meshes.get(meshIndex);
             Texture texture = texturesByMaterial.get(mesh.materialIndex);
 
-            /*
-             * Malla con huesos: el vértice ya sale del shader en espacio de escena
-             * (jointGlobal * inverseBindMatrix), por lo que la transformación del nodo
-             * que contiene la malla debe IGNORARSE (así lo define glTF). Si se aplicara,
-             * las escalas/rotaciones de la jerarquía se contarían dos veces.
-             * Malla sin huesos: sí usa la transformación global de su nodo.
-             */
             Matrix4f meshTransform = mesh.hasBones ? rootModelMatrix : globalTransform;
 
             Matrix4f mvp = new Matrix4f(vp).mul(meshTransform);
@@ -1168,12 +1076,6 @@ public class GlbModel {
         return recommendedScale;
     }
 
-    /**
-     * Block 8: rest-pose bounding-box size in model units - the same
-     * measurement as the "Encuadre (pose de reposo)" print, exposed so
-     * GameMain can size every rat clip variant to the same rendered height.
-     * Returns a copy; (0,0,0) means the framing was invalid at load.
-     */
     public org.joml.Vector3f getRestPoseSize() {
         return new org.joml.Vector3f(restPoseSize);
     }
@@ -1326,7 +1228,7 @@ public class GlbModel {
     }
 
     public static void drawGLB(GlbModel model, Matrix4f vp, Matrix4f glbModelMatrix, MasterRenderer masterRenderer, Camera camera) {
-        model.update(0.0f); // TODO: Añadir cálculo delta
+        model.update(0.0f); 
         vp = new Matrix4f(masterRenderer.getProjectionMatrix()).mul(Maths.createViewMatrix(camera));
         GL20.glUseProgram(model.shaderProgram);
         GL20.glUniform3f(model.locationLightDirection, -0.35f, -1.0f, -0.25f);

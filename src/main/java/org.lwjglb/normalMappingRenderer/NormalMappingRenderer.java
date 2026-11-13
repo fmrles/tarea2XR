@@ -22,7 +22,6 @@ import org.lwjglb.util.Maths;
 public class NormalMappingRenderer {
 
 	private NormalMappingShader shader;
-	// Block 17: models already warned about a missing normal map (one line each).
 	private final java.util.Set<TexturedModel> warnedMissingNormalMap = new java.util.HashSet<>();
 
 	public NormalMappingRenderer(Matrix4f projectionMatrix) {
@@ -66,15 +65,10 @@ public class NormalMappingRenderer {
 			MasterRenderer.disableCulling();
 		}
 		shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
-		// Invariant (block 17): EVERY model routed through this renderer must
-		// have setNormalMap called — a missing normal map (id 0) samples
-		// garbage on unit 1 and the model renders dark. Warn once per model.
 		if (texture.getNormalMap() == 0 && warnedMissingNormalMap.add(model)) {
 			System.err.println("normalMap missing for TexturedModel(vao="
 					+ rawModel.getVaoID() + ") - it will render dark");
 		}
-		// Normal map on unit 1 FIRST, then reactivate unit 0 for the albedo
-		// (order matters: glActiveTexture selects where the next bind lands).
 		GL13.glActiveTexture(GL13.GL_TEXTURE1);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getNormalMap());
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -101,7 +95,6 @@ public class NormalMappingRenderer {
 
 	private void prepare(Vector4f clipPlane, List<Light> lights, Camera camera, float fogR, float fogG, float fogB) {
 		shader.loadClipPlane(clipPlane);
-		// Block 14: fog colour comes from the caller (MasterRenderer's active zone).
 		shader.loadSkyColour(fogR, fogG, fogB);
 		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
 		

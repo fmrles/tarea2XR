@@ -16,12 +16,6 @@ import org.lwjglb.util.Maths;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Handles the rendering of a model to the screen.
- * 
- * @author Karl
- *
- */
 public class EntityRenderer {
 
 	private StaticShader shader;
@@ -55,8 +49,6 @@ public class EntityRenderer {
 		GL20.glEnableVertexAttribArray(2);
 		ModelTexture texture = model.getTexture();
 		shader.loadNumberOfRows(texture.getNumberOfRows());
-		// Only turn culling off for transparent models, and remember it so
-		// unbindTexturedModel() does not re-enable it behind our back.
 		cullingWasDisabled = texture.isHasTransparency();
 		if (cullingWasDisabled) {
 			MasterRenderer.disableCulling();
