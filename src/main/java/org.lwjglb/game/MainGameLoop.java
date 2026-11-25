@@ -37,7 +37,7 @@ import javax.imageio.ImageIO;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class GameMain {
+public class MainGameLoop {
 
     private static final String RAT_GLB_DIR = "src/main/resources/models/";
 
